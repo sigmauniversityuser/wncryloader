@@ -1,0 +1,1540 @@
+--[[
+
+
+██╗░░░░░███████╗░█████╗░██╗░░██╗███████╗██████╗░  ██████╗░██╗░░░██╗
+██║░░░░░██╔════╝██╔══██╗██║░██╔╝██╔════╝██╔══██╗  ██╔══██╗╚██╗░██╔╝
+██║░░░░░█████╗░░███████║█████═╝░█████╗░░██║░░██║  ██████╦╝░╚████╔╝░
+██║░░░░░██╔══╝░░██╔══██║██╔═██╗░██╔══╝░░██║░░██║  ██╔══██╗░░╚██╔╝░░
+███████╗███████╗██║░░██║██║░╚██╗███████╗██████╔╝  ██████╦╝░░░██║░░░
+╚══════╝╚══════╝╚═╝░░╚═╝╚═╝░░╚═╝╚══════╝╚═════╝░  ╚═════╝░░░░╚═╝░░░
+
+██╗░░██╗██╗░░██╗░█████╗░██╗░░██╗███████╗██████╗░
+██║░░██║╚██╗██╔╝██╔══██╗██║░██╔╝██╔════╝██╔══██╗
+███████║░╚███╔╝░██║░░╚═╝█████═╝░█████╗░░██████╔╝
+██╔══██║░██╔██╗░██║░░██╗██╔═██╗░██╔══╝░░██╔══██╗
+██║░░██║██╔╝╚██╗╚█████╔╝██║░╚██╗███████╗██║░░██║
+╚═╝░░╚═╝╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝╚══════╝╚═╝░░╚═╝ 
+
+--]]
+
+
+local free_access = loadstring(game:HttpGet("https://pastebin.com/raw/Z5HamGnQ"))() -- make it return true if delated
+
+
+
+if free_access == true then
+
+--[[
+
+    ///////////////////////////////
+    //  © 2022 - 2024 Affinity   //
+    //    All rights reserved    //
+    ///////////////////////////////
+    // This material may not be  //
+    //   reproduced, displayed,  //
+    //  modified or distributed  //
+    // without the express prior //
+    // written permission of the //
+    //   the copyright holder.   //
+    ///////////////////////////////
+    // AZURE VER 4 BY LINEMASTER //
+    // Affinity by elijah.cooool //
+    ///////////////////////////////
+
+]]--
+
+
+
+do
+local getinfo = getinfo or debug.getinfo
+local DEBUG = false
+local Hooked = {}
+
+local Detected, Kill
+
+setthreadidentity(2)
+--LPH_NO_VIRTUALIZE(function()
+for i, v in getgc(true) do
+    if typeof(v) == "table" then
+        local DetectFunc = rawget(v, "Detected")
+        local KillFunc = rawget(v, "Kill")
+    
+        if typeof(DetectFunc) == "function" and not Detected then
+            Detected = DetectFunc
+            
+            local Old; Old = hookfunction(Detected, function(Action, Info, NoCrash)
+                if Action ~= "_" then
+                    if DEBUG then
+                        warn(`Adonis AntiCheat flagged\nMethod: {Action}\nInfo: {Info}`)
+                    end
+                end
+                
+                return true
+            end)
+
+            table.insert(Hooked, Detected)
+        end
+
+        if rawget(v, "Variables") and rawget(v, "Process") and typeof(KillFunc) == "function" and not Kill then
+            Kill = KillFunc
+            local Old; Old = hookfunction(Kill, function(Info)
+                if DEBUG then
+                    warn(`Adonis AntiCheat tried to kill (fallback): {Info}`)
+                end
+            end)
+
+            table.insert(Hooked, Kill)
+        end
+    end
+end
+
+local Old; Old = hookfunction(getrenv().debug.info, newcclosure(function(...)
+    local LevelOrFunc, Info = ...
+
+    if Detected and LevelOrFunc == Detected then
+        if DEBUG then
+            warn(`Adonis Bypassed!`)
+        end
+
+        return coroutine.yield(coroutine.running())
+    end
+    
+    return Old(...)
+end))
+--end)()
+-- setthreadidentity(9)
+setthreadidentity(7)
+end
+
+function load()
+    --// Services
+    local Debris = game:GetService('Debris')
+    local EtherealParts = Instance.new('Folder', workspace)
+    EtherealParts.Name  = 'EtherealParts'
+    local Players = game:GetService("Players")
+    local UserInputService = game:GetService("UserInputService")
+    local Workspace = game:GetService("Workspace")
+    local Lighting = game:GetService("Lighting")
+    local RunService = game:GetService("RunService")
+    local TweenService = game:GetService("TweenService")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local CC = Workspace.CurrentCamera
+    --// Variables
+    local LocalPlayer = Players.LocalPlayer
+    local Camera = Workspace:FindFirstChildWhichIsA("Camera")
+    local Hitsounds = {}
+
+    --// Script Table
+    local Script = {
+        Functions = {},
+        Folders = {},
+        Parts = {},
+        Locals = {
+            Target = nil,
+            IsTargetting = false,
+            Resolver = {
+                OldTick = os.clock(),
+                OldPos = Vector3.new(0, 0, 0),
+                ResolvedVelocity = Vector3.new(0, 0, 0)
+            },
+            AutoSelectTick = tick(),
+            AntiAimViewer = {
+                MouseRemoteFound = false,
+                MouseRemote = nil,
+                MouseRemoteArgs = nil,
+                MouseRemotePositionIndex = nil
+            },
+            HitEffect = {
+                ["Nova Impact"] = nil,
+                ["Crescent Slash"] = nil,
+                ["Crescent Slash"] = nil,
+                ["Coom"] = nil,
+                ["Cosmic Explosion"] = nil,
+                ["Slash"] = nil,
+                ["Atomic Slash"] = nil,
+            },
+            Gun = {
+                PreviousGun = nil,
+                PreviousAmmo = 999,
+                Shotguns = {"[Double-Barrel SG]", "[TacticalShotgun]", "[Shotgun]"}
+            },
+            PlayerHealth = {},
+            JumpOffset = 0,
+            BulletPath = {
+                [4312377180] = Workspace:FindFirstChild("MAP") and Workspace.MAP:FindFirstChild("Ignored") or nil,
+                [1008451066] = Workspace:FindFirstChild("Ignored") and Workspace.Ignored:FindFirstChild("Siren") and Workspace.Ignored.Siren:FindFirstChild("Radius") or nil,
+                [3985694250] = Workspace and Workspace:FindFirstChild("Ignored") or nil,
+                [5106782457] = Workspace and Workspace:FindFirstChild("Ignored") or nil,
+                [4937639028] = Workspace and Workspace:FindFirstChild("Ignored") or nil,
+                [1958807588] = Workspace and Workspace:FindFirstChild("Ignored") or nil
+            },
+            World = {
+                FogColor = Lighting.FogColor,
+                FogStart = Lighting.FogStart,
+                FogEnd = Lighting.FogEnd,
+                Ambient = Lighting.Ambient,
+                Brightness = Lighting.Brightness,
+                ClockTime = Lighting.ClockTime,
+                ExposureCompensation = Lighting.ExposureCompensation
+            },
+            SavedCFrame = nil,
+            NetworkPreviousTick = tick(),
+            NetworkShouldSleep = false,
+            FFlags = {
+      }
+            ,OriginalVelocity = {},
+            RotationAngle = 0
+        },
+        Utility = {
+            Drawings = {},
+            EspCache = {}
+        },
+        Connections = {
+            GunConnections = {}
+        },
+        AuraIgnoreFolder = Instance.new("Folder", game:GetService("Workspace"))
+    }
+
+    --// Settings Table
+    local Settings = {
+        Combat = {
+            Enabled = false,
+            Skibidi = false,
+            AimPart = "HumanoidRootPart",
+            Silent = false,
+            BetaAirshot = false,
+            TriggerBot = {
+                Enabled = false,
+                Delay = 0,
+                TargeyOnly = false,
+                FOV = {
+                    Show = true,
+                    Size = 80
+                }
+            },
+            TargetInfo = false,
+            Camera = false,
+            EasingStyle = "Sine",
+            EasingDirection = "Out",
+            Alerts = true,
+            LookAt = false,
+            Spectate = false,
+            PingBased = false,
+            UseIndex = false,
+            AntiAimViewer = false,
+            AutoSelect = {
+                Enabled = false,
+                Cooldown = {
+                    Enabled = false,
+                    Amount = 0.5
+                }
+            },
+            Checks = {
+                Enabled = false,
+                Knocked = false,
+                Crew = false,
+                Wall = false,
+                Grabbed = false,
+                Vehicle = false
+            },
+            Smoothing = {
+                Horizontal = 1,
+                Vertical = 1
+            },
+            Prediction = {
+                Horizontal = 0.134,
+                Vertical = 0.134
+            },
+            Resolver = {
+                Enabled = false,
+                Smoothness = 0.5
+            },
+            Fov = {
+                Visualize = {
+                    Enabled = false,
+                    Color = Color3.new(1, 1, 1)
+                },
+                Radius = 80
+            },
+            Visuals = {
+                Enabled = true,
+                Tracer = {
+                    Enabled = false,
+                    Color = Color3.new(1, 1, 1),
+                    Thickness = 2
+                },
+                Dot = {
+                    Enabled = false,
+                    Color = Color3.new(1, 1, 1),
+                    Filled = true,
+                    Size = 6
+                },
+                Chams = {
+                    Enabled = false,
+                    Fill = {
+                        Color = Color3.fromRGB(255,209,220),
+                        Transparency = 0.5
+                    },
+                    Outline = {
+                        Color = Color3.new(255,255,255),
+                        Transparency = 0
+                    }
+                }
+            },
+            Air = {
+                Enabled = true,
+                AirAimPart = {
+                    Enabled = false,
+                    HitPart = "LowerTorso"
+                },
+                JumpOffset = {
+                    Enabled = false,
+                    Offset = 0
+                }
+            }
+        },
+        Visuals = {
+            Backtrack = {
+                Enabled = true,
+                Color = Color3.fromRGB(255,255,255),
+                Method = "Folllow",
+                Transparency = 0.5,
+                Material = "Plastic",
+            },
+            BulletTracers = {
+                Enabled = false,
+                Color = {
+                    Gradient1 = Color3.new(1, 1, 1),
+                    Gradient2 = Color3.new(0, 0, 0)
+                },
+                Duration = 1,
+                Fade = {
+                    Enabled = false,
+                    Duration = 0.5
+                }
+            },
+            BulletImpacts = {
+                Enabled = false,
+                Color = Color3.new(1, 1, 1),
+                Duration = 1,
+                Size = 1,
+                Material = "SmoothPlastic",
+                Fade = {
+                    Enabled = false,
+                    Duration = 0.5
+                }
+            },
+            OnHit = {
+                Enabled = false,
+                Effect = {
+                    Enabled = false,
+                    Color = Color3.new(1, 1, 1)
+                },
+                Sound = {
+                    Enabled = false,
+                    Volume = 5,
+                    Value = "hentai4.wav"
+                },
+                Chams = {
+                    Enabled = false,
+                    Color = Color3.fromRGB(255,209,220),
+                    Material = "ForceField",
+                    Duration = 1
+                }
+            },
+            World = {
+                Enabled = false,
+                Fog = {
+                    Enabled = false,
+                    Color = Color3.fromRGB(255,209,220),
+                    End = 1000,
+                    Start = 10000
+                },
+                Ambient = {
+                    Enabled = false,
+                    Color = Color3.fromRGB(255,209,220)
+                },
+                Brightness = {
+                    Enabled = false,
+                    Value = 0
+                },
+                ClockTime = {
+                    Enabled = false,
+                    Value = 24
+                },
+                WorldExposure = {
+                    Enabled = false,
+                    Value = -0.1
+                }
+            },
+            Crosshair = {
+                Enabled = false,
+                StickToTarget = false,
+                Color = Color3.new(1, 1, 1),
+                Size = 10,
+                Gap = 2,
+                Rotation = {
+                    Enabled = false,
+                    Speed = 1
+                }
+            }
+        },
+        AntiAim = {
+            DaCoolBoyDesync = false,
+            DaCoolBoyDesync2 = false,
+            DaCoolBoyDesync3 = false,
+            VelocitySpoofer = {
+                Enabled = false,
+                Visualize = {
+                    Enabled = false,
+                    Color = Color3.fromRGB(255,209,220),
+                    Prediction = 0.134
+                },
+                Type = "Underground",
+                Roll = 0,
+                Pitch = 0,
+                Yaw = 0
+            },
+            CSync = {
+                Enabled = false,
+                Spoof = false,
+                Type = "Target Strafe",
+                Visualize = {
+                    Enabled = false,
+                    Color = Color3.fromRGB(255,209,220)
+                },
+                RandomDistance = 10,
+                Custom = {
+                    X = 0,
+                    Y = 0,
+                    Z = 0
+                },
+                TargetStrafe = {
+                    Speed = 1,
+                    Distance = 1,
+                    Height = 1
+                }
+            },
+            Network = {
+                Enabled = false,
+                WalkingCheck = false,
+                Amount = 0.05
+            },
+            VelocityDesync = {
+                Enabled = false,
+                Range = 1
+            },
+            FFlagDesync = {
+                Enabled = false,
+                SetNew = false,
+                FFlags = {"S2PhysicsSenderRate"}, 
+                SetNewAmount = 1,
+                Amount = 1
+            },
+        },
+        Misc = {
+            Movement = {
+                Macro = {
+                    Enabled = false,
+                    Speed = 0.1,
+                },
+                Speed = {
+                    Enabled = false,
+                    Amount = 1
+                },
+            },
+            Exploits = {
+                Enabled = false,
+                NoRecoil = false,
+                NoJumpCooldown = false,
+                NoSlowDown = false
+            }
+        }
+    }
+
+getgenv().taffy_esp = {
+    enabled = false,
+    box = {
+        boxes = false,
+        boxtype = "2D",
+        filled = false,
+        filledColor = Color3.fromRGB(255, 255, 255),
+        outline = false,
+        healthbar = false,
+        healthtext = false,
+        healthtextcolor = Color3.new(255, 255, 255),
+        color1 = Color3.fromRGB(255, 255, 255),
+        color2 = Color3.fromRGB(0, 0, 0),
+        healthbarcolor = Color3.fromRGB(0, 255, 0)
+    },
+    tracer = {
+        enabled = false,
+        unlocktracers = false,
+        color = Color3.fromRGB(255, 255, 255)
+    },
+    name = {
+        enabled = false,
+        outline = false,
+        size = 16.6,
+        font = 2,
+        color = Color3.fromRGB(255, 255, 255)
+    },
+    misc = {
+        teamcheck = false,
+        useteamcolors = false,
+        visibleonly = true,
+        target = false,
+        fade = false,
+        fadespeed = 4
+    },  
+    Toolsshow = {
+        enable = false,
+        outline = false,
+        size = 8,
+        font = 3,
+        color = Color3.fromRGB(255, 255, 255)
+    },
+    Skeletons = {
+        Enabled = false,
+        Color = Color3.new(255, 255, 255)
+    }
+}
+
+do
+local Esp = {}
+local ThreeDrawingLibrary = loadstring(game:HttpGet("https://pastebin.com/raw/QVJPXgfV"))()
+local RunService = game:GetService("RunService")
+local Client = game:GetService("Players").LocalPlayer
+
+
+function Esp:Esp(v)
+    local bones = {
+        {"Head", "UpperTorso"},
+        {"UpperTorso", "RightUpperArm"},
+        {"RightUpperArm", "RightLowerArm"},
+        {"RightLowerArm", "RightHand"},
+        {"UpperTorso", "LeftUpperArm"},
+        {"LeftUpperArm", "LeftLowerArm"},
+        {"LeftLowerArm", "LeftHand"},
+        {"UpperTorso", "LowerTorso"},
+        {"LowerTorso", "LeftUpperLeg"},
+        {"LeftUpperLeg", "LeftLowerLeg"},
+        {"LeftLowerLeg", "LeftFoot"},
+        {"LowerTorso", "RightUpperLeg"},
+        {"RightUpperLeg", "RightLowerLeg"},
+        {"RightLowerLeg", "RightFoot"}
+    }
+
+    function lerp(a, b, t)
+        return a + (b - a) * t
+    end
+
+    local function fade(drawObject)
+        local currentAlpha = drawObject.Transparency
+        local lerpAlpha = taffy_esp.misc.fadespeed * 0.05
+
+        if taffy_esp.misc.fade then
+            local oscillation = (math.sin(tick() * taffy_esp.misc.fadespeed) + 1) / 2
+            drawObject.Transparency = lerp(currentAlpha, oscillation, lerpAlpha)
+        else
+            drawObject.Transparency = 1
+        end
+    end
+    
+    local function fadeFill(drawObject)
+        local currentAlpha = drawObject.Transparency
+        local lerpAlpha = taffy_esp.misc.fadespeed * 0.05
+    
+        if taffy_esp.misc.fade then
+            local oscillation = (math.sin(tick() * taffy_esp.misc.fadespeed) + 1) / 2
+            local newAlpha = lerp(currentAlpha, oscillation, lerpAlpha)
+            drawObject.Transparency = math.min(newAlpha, 0.3)
+        else
+            drawObject.Transparency = 0.3
+        end
+    end
+    
+    local BLOCKOUTLINE = nil
+    local BOXPLAYER = nil
+    local FILLEDBOXPLAYER = nil
+    local HealthBarBackground = nil
+    local HealthBarITSELF = nil
+    local Cube = nil
+    local HealthText = nil
+    local Tracer = nil
+    local Name = nil
+    local toolshow = nil
+    local SkeletonLines = {}
+    
+    RunService.RenderStepped:Connect(function()
+        if v.Character ~= nil and v.Character:FindFirstChild("Humanoid") ~= nil and v.Character:FindFirstChild("HumanoidRootPart") ~= nil and v ~= Client and v.Character.Humanoid.Health > 0 and (not taffy_esp.misc.teamcheck or v.TeamColor == Client.TeamColor) and v.Character:FindFirstChild("Head") ~= nil and taffy_esp.enabled then
+            local Vector, onScreen = game:GetService("Workspace").CurrentCamera:worldToViewportPoint(v.Character.HumanoidRootPart.Position)
+            
+            if onScreen then
+                local RootPart = v.Character.HumanoidRootPart
+                local Head = v.Character.Head
+                local RootPosition, RootVis = game:GetService("Workspace").CurrentCamera:worldToViewportPoint(RootPart.Position)
+                local HeadPosition = game:GetService("Workspace").CurrentCamera:worldToViewportPoint(Head.Position + Vector3.new(0, 1.3, 0))
+                local LegPosition = game:GetService("Workspace").CurrentCamera:worldToViewportPoint(RootPart.Position - Vector3.new(0, 3.6, 0))
+
+                if not taffy_esp.misc.target or v == Script.Locals.Target and Script.Locals.IsTargetting then
+                    if taffy_esp.box.boxes and taffy_esp.enabled then
+                        if taffy_esp.box.boxtype == "2D" then
+                            local height = HeadPosition.Y - LegPosition.Y
+                            local yOffset = 0
+                            local centerHeight = LegPosition.Y + height / 2
+                            local boxSize = Vector2.new(2700 / RootPosition.Z, height)
+                            local boxPosition = Vector2.new(RootPosition.X - boxSize.X / 2, centerHeight - boxSize.Y / 2 + yOffset)
+                    
+                            
+                            if not BLOCK then
+                                BLOCKOUTLINE = Drawing.new("Square")
+                                BLOCKOUTLINE.Visible = false
+                                BLOCKOUTLINE.Color = Color3.new(0, 0, 0)
+                                BLOCKOUTLINE.Thickness = 3
+                                BLOCKOUTLINE.Transparency = 1
+                                BLOCKOUTLINE.Filled = false
+                            end
+                    
+                            if BLOCKOUTLINE then
+                                BLOCKOUTLINE.Size = boxSize
+                                BLOCKOUTLINE.Position = boxPosition
+                                BLOCKOUTLINE.Visible = taffy_esp.box.outline
+                                BLOCKOUTLINE.Transparency = 0
+                                BLOCKOUTLINE.Color = taffy_esp.box.color2
+                            end
+                    
+                            if not BOXPLAYER then
+                                BOXPLAYER = Drawing.new("Square")
+                                BOXPLAYER.Visible = false
+                                BOXPLAYER.Color = taffy_esp.box.color1
+                                BOXPLAYER.Thickness = 1
+                                BOXPLAYER.Transparency = 1
+                                BOXPLAYER.Filled = false
+                            end
+                    
+                            if BOXPLAYER then
+                                BOXPLAYER.Size = boxSize
+                                BOXPLAYER.Position = boxPosition
+                                BOXPLAYER.Visible = taffy_esp.box.boxes 
+                                BOXPLAYER.Transparency = 0
+                                BOXPLAYER.Color = taffy_esp.box.color1
+                            end
+                    
+                            if Cube then
+                                Cube:Remove()
+                                Cube = nil
+                            end
+                            if taffy_esp.box.filled then
+                                if not FILLEDBOXPLAYER then
+                                    FILLEDBOXPLAYER = Drawing.new("Square")
+                                    FILLEDBOXPLAYER.Visible = false
+                                    FILLEDBOXPLAYER.Color = taffy_esp.box.filledColor
+                                    FILLEDBOXPLAYER.Filled = true
+                                    FILLEDBOXPLAYER.Transparency = 0.3
+                                end 
+                    
+                                if FILLEDBOXPLAYER then
+                                    FILLEDBOXPLAYER.Size = boxSize
+                                    FILLEDBOXPLAYER.Position = boxPosition
+                                    FILLEDBOXPLAYER.Visible = true
+                                    FILLEDBOXPLAYER.Color = taffy_esp.box.filledColor
+                                end
+                            else
+                                if FILLEDBOXPLAYER then
+                                    FILLEDBOXPLAYER:Remove()
+                                    FILLEDBOXPLAYER = nil
+                                end
+                            end
+                        elseif taffy_esp.box.boxtype == "3D" then
+                            if BLOCKOUTLINE then
+                                BLOCKOUTLINE:Remove()
+                                BLOCKOUTLINE = nil
+                            end 
+                    
+                            if BOXPLAYER then
+                                BOXPLAYER:Remove()
+                                BOXPLAYER = nil
+                            end
+                            if FILLEDBOXPLAYER then
+                                FILLEDBOXPLAYER:Remove()
+                                FILLEDBOXPLAYER = nil
+                            end
+                            if not Cube then
+                                Cube = ThreeDrawingLibrary:New3DCube()
+                                Cube.Visible = false
+                                Cube.ZIndex = 3
+                                Cube.Transparency = 1
+                                Cube.Color = Color3.fromRGB(255, 255, 255)
+                                Cube.Thickness = 1
+                                Cube.Filled = false
+                            end
+                    
+                            if Cube then
+                                Cube.Color = taffy_esp.box.color1
+                                Cube.Size = Vector3.new(1.5, 3, 1.5)
+                                Cube.Position = Vector3.new(v.Character.HumanoidRootPart.Position.X, v.Character.HumanoidRootPart.Position.Y, v.Character.HumanoidRootPart.Position.Z)
+                                Cube.Visible = true
+                            end
+                        end
+                    else
+                        if BLOCKOUTLINE then
+                            BLOCKOUTLINE:Remove()
+                            BLOCKOUTLINE = nil
+                        end
+                        if BOXPLAYER then
+                            BOXPLAYER:Remove()
+                            BOXPLAYER = nil
+                        end
+                    
+                        if FILLEDBOXPLAYER then
+                            FILLEDBOXPLAYER:Remove()
+                            FILLEDBOXPLAYER = nil
+                        end
+                    
+                        if Cube then
+                            Cube:Remove()
+                            Cube = nil
+                        end
+                    end
+                    
+                    if taffy_esp.tracer.enabled and taffy_esp.enabled then
+                        if not Tracer then
+                            Tracer = Drawing.new("Line")
+                            Tracer.Visible = false
+                            Tracer.Color = Color3.new(1, 1, 1)
+                            Tracer.Thickness = 1
+                            Tracer.Transparency = 1
+                        end
+
+                        if taffy_esp.tracer.unlocktracers and Tracer then
+                            Tracer.From = Vector2.new(Client:GetMouse().X, Client:GetMouse().Y + 36)
+                        else
+                            Tracer.From = Vector2.new(game:GetService("Workspace").CurrentCamera.ViewportSize.X / 2, game:GetService("Workspace").CurrentCamera.ViewportSize.Y / 1)
+                        end
+
+                        if Tracer then
+                            Tracer.To = Vector2.new(Vector.X, Vector.Y)
+                            Tracer.Visible = true
+                        end
+                    else
+                        if Tracer then
+                            Tracer:Remove()
+                            Tracer = nil
+                        end
+                    end
+
+                    if taffy_esp.Skeletons.Enabled and taffy_esp.enabled then
+                        if #SkeletonLines == 0 then
+                            for _, bonePair in ipairs(bones) do
+                                local parentBone, childBone = bonePair[1], bonePair[2]
+                                local skeletonLine = Drawing.new("Line")
+                                skeletonLine.Color = taffy_esp.Skeletons.Color
+                                skeletonLine.Thickness = 1
+                                skeletonLine.Transparency = 1
+                                SkeletonLines[#SkeletonLines + 1] = {skeletonLine, parentBone, childBone}
+                            end
+                        end
+                    
+                        for _, lineData in ipairs(SkeletonLines) do
+                            local skeletonLine = lineData[1]
+                            local parentBone, childBone = lineData[2], lineData[3]
+                    
+                            if v.Character and v.Character:FindFirstChild(parentBone) and v.Character:FindFirstChild(childBone) then
+                                local parentPosition, parentOnScreen = game:GetService("Workspace").CurrentCamera:worldToViewportPoint(v.Character[parentBone].Position)
+                                local childPosition, childOnScreen = game:GetService("Workspace").CurrentCamera:worldToViewportPoint(v.Character[childBone].Position)
+                    
+                                if parentOnScreen and childOnScreen then
+                                    skeletonLine.From = Vector2.new(parentPosition.X, parentPosition.Y)
+                                    skeletonLine.To = Vector2.new(childPosition.X, childPosition.Y)
+                                    skeletonLine.Color = taffy_esp.Skeletons.Color
+                                    skeletonLine.Visible = true
+                                else
+                                    skeletonLine.Visible = false
+                                end
+                            else
+                                skeletonLine.Visible = false
+                            end
+                        end
+                    else
+                        for _, lineData in ipairs(SkeletonLines) do
+                            local skeletonLine = lineData[1]
+                            if skeletonLine then
+                                skeletonLine.Visible = false
+                            end
+                        end
+                    end
+                    
+                    if taffy_esp.box.healthbar and taffy_esp.enabled then
+                        if not HealthBarBackground then
+                            HealthBarBackground = Drawing.new("Square")
+                            HealthBarBackground.Thickness = 1
+                            HealthBarBackground.Filled = true
+                            HealthBarBackground.Color = Color3.new(0, 0, 0)
+                            HealthBarBackground.Transparency = 0.5
+                            HealthBarBackground.Visible = false
+                        end
+                    
+                        if not HealthBarITSELF then
+                            HealthBarITSELF = Drawing.new("Line")
+                            HealthBarITSELF.Thickness = 2
+                            HealthBarITSELF.Color = taffy_esp.box.healthbarcolor
+                            HealthBarITSELF.Transparency = 1
+                            HealthBarITSELF.Visible = false
+                        end
+                    
+                        if not HealthText and taffy_esp.box.healthtext then
+                            HealthText = Drawing.new("Text")
+                            HealthText.Text = ""
+                            HealthText.Size = 15
+                            HealthText.Color = Color3.new(1, 1, 1)
+                            HealthText.Outline = true
+                            HealthText.Center = true
+                            HealthText.Visible = true
+                        end
+                    
+                        local height = HeadPosition.Y - LegPosition.Y
+                        local centerHeight = LegPosition.Y + height / 2
+                        local yOffset = 0
+                        local boxSize = Vector2.new(2700 / RootPosition.Z, height)
+                        local boxPosition = Vector2.new(RootPosition.X - boxSize.X / 2, centerHeight - boxSize.Y / 2 + yOffset)
+                        local healthPercentage = math.clamp(v.Character.Humanoid.Health / 100, 0, 1)
+                        local healthBarSize = Vector2.new(4, height * healthPercentage)
+                        local healthBarPosition = Vector2.new(boxPosition.X - 5, boxPosition.Y + (1 / healthBarSize.Y))
+                        HealthBarBackground.Size = Vector2.new(healthBarSize.X, height)
+                        HealthBarBackground.Position = Vector2.new(healthBarPosition.X, boxPosition.Y)
+                        HealthBarBackground.Visible = true
+                        
+                        HealthBarITSELF.From = Vector2.new(healthBarPosition.X + 1, healthBarPosition.Y + 1)
+                        HealthBarITSELF.To = Vector2.new(healthBarPosition.X + 1, healthBarPosition.Y + 1 + healthBarSize.Y - 2)
+                        HealthBarITSELF.Visible = true
+                        if taffy_esp.box.healthtext then
+                            local healthTextPosition = Vector2.new(healthBarPosition.X - 18, healthBarPosition.Y + 1 + healthBarSize.Y - 4)
+                            HealthText.Position = healthTextPosition
+                            HealthText.Text = math.floor(v.Character.Humanoid.Health) .. "%"
+                            HealthText.Color = taffy_esp.box.healthtextcolor
+                            HealthText.Visible = true
+                        else
+                            if HealthText then
+                                HealthText:Remove()
+                                HealthText = nil
+                            end
+                        end
+                    else
+                        if HealthBarBackground then
+                            HealthBarBackground:Remove()
+                            HealthBarBackground = nil
+                        end
+                    
+                        if HealthBarITSELF then
+                            HealthBarITSELF:Remove()
+                            HealthBarITSELF = nil
+                        end
+                    
+                        if HealthText then
+                            HealthText:Remove()
+                            HealthText = nil
+                        end
+                    end
+                    
+                    if taffy_esp.Toolsshow.enable and taffy_esp.enabled then
+                        if not toolshow then
+                            toolshow = Drawing.new("Text")
+                            toolshow.Transparency = 1
+                            toolshow.Visible = false
+                            toolshow.Color = taffy_esp.Toolsshow.color
+                            toolshow.Size = 16
+                            toolshow.Center = true
+                            toolshow.Outline = taffy_esp.Toolsshow.outline
+                            toolshow.Font = 2
+                        end
+            
+                        if toolshow then
+                            local Equipped = v.Character:FindFirstChildOfClass("Tool") and v.Character:FindFirstChildOfClass("Tool").Name or "None"
+                            toolshow.Text = Equipped
+                            toolshow.Position = Vector2.new((v.Character.HumanoidRootPart.Size.X / 2) + LegPosition.X, LegPosition.Y)
+                            toolshow.Color = taffy_esp.Toolsshow.color
+                            toolshow.Outline = taffy_esp.Toolsshow.outline
+                            toolshow.Font = 3
+                            toolshow.Size = 16
+                            toolshow.Visible = true
+                        end
+                    else
+                        if toolshow then
+                            toolshow:Remove()
+                            toolshow = nil
+                        end
+                    end
+            
+                    if taffy_esp.name.enabled and taffy_esp.enabled then
+                        if not Name then
+                            Name = Drawing.new("Text")
+                            Name.Transparency = 1
+                            Name.Visible = false
+                            Name.Color = taffy_esp.name.color
+                            Name.Size = 16
+                            Name.Center = true
+                            Name.Outline = false
+                            Name.Font = 2
+                        end
+                        if Name then
+                            Name.Text = tostring(v.Character.Humanoid.DisplayName)
+                            Name.Position = Vector2.new((v.Character.HumanoidRootPart.Size.X / 2) + HeadPosition.X, HeadPosition.Y - 19)
+                            Name.Visible = true
+                            Name.Size = 16
+                            Name.Outline = taffy_esp.name.outline
+                        end
+                    else
+                        if Name then
+                            Name:Remove()
+                            Name = nil
+                        end
+                    end
+
+                    if BLOCKOUTLINE then
+                        fade(BLOCKOUTLINE)
+                    end
+                    if BOXPLAYER then
+                        fade(BOXPLAYER)
+                    end
+                    if HealthText then
+                        fade(HealthText)
+                    end
+                    if FILLEDBOXPLAYER then
+                        fadeFill(FILLEDBOXPLAYER)
+                    end
+                    if HealthBarBackground then
+                        fade(HealthBarBackground)
+                    end
+                    if HealthBarITSELF then
+                        fade(HealthBarITSELF)
+                    end
+                    if Tracer then
+                        fade(Tracer)
+                    end 
+                    if Name then
+                        fade(Name)
+                    end
+                    if toolshow then
+                        fade(toolshow)
+                    end
+                    if Cube then
+                        fade(Cube)
+                    end
+                    for _, lineData in ipairs(SkeletonLines) do
+                        if lineData[1] then
+                            fade(lineData[1])
+                        end 
+                    end
+                else
+                    if BLOCKOUTLINE then
+                        BLOCKOUTLINE:Remove()
+                        BLOCKOUTLINE = nil
+                    end
+                    if BOXPLAYER then
+                        BOXPLAYER:Remove()
+                        BOXPLAYER = nil
+                    end
+                    if FILLEDBOXPLAYER then
+                        FILLEDBOXPLAYER:Remove()
+                        FILLEDBOXPLAYER = nil
+                    end
+                    if toolshow then
+                        toolshow:Remove()
+                        toolshow = nil
+                    end
+                    if HealthBarITSELF then
+                        HealthBarITSELF:Remove()
+                        HealthBarITSELF = nil
+                    end
+                    if HealthBarBackground then
+                        HealthBarBackground:Remove()
+                        HealthBarBackground = nil
+                    end
+                    if Tracer then
+                        Tracer:Remove()
+                        Tracer = nil
+                    end
+                    if Name then
+                        Name:Remove()
+                        Name = nil
+                    end
+                    if Cube then
+                        Cube:Remove()
+                        Cube = nil
+                    end
+                    if HealthText then
+                        HealthText:Remove()
+                        HealthText = nil
+                    end
+                    for _, lineData in ipairs(SkeletonLines) do
+                        if lineData[1] then
+                            lineData[1]:Remove()
+                            SkeletonLines = {}
+                        end
+                    end
+                end
+            else
+                if toolshow then
+                    toolshow:Remove()
+                    toolshow = nil
+                end
+                if BLOCKOUTLINE then
+                    BLOCKOUTLINE:Remove()
+                    BLOCKOUTLINE = nil
+                end
+                if HealthText then
+                    HealthText:Remove()
+                    HealthText = nil
+                end
+                if BOXPLAYER then
+                    BOXPLAYER:Remove()
+                    BOXPLAYER = nil
+                end
+                if FILLEDBOXPLAYER then
+                    FILLEDBOXPLAYER:Remove()
+                    FILLEDBOXPLAYER = nil
+                end
+                if HealthBarITSELF then
+                    HealthBarITSELF:Remove()
+                    HealthBarITSELF = nil
+                end
+                if HealthBarBackground then
+                    HealthBarBackground:Remove()
+                    HealthBarBackground = nil
+                end
+                if Tracer then
+                    Tracer:Remove()
+                    Tracer = nil
+                end
+                if Name then
+                    Name:Remove()
+                    Name = nil
+                end
+                if Cube then
+                    Cube:Remove()
+                    Cube = nil
+                end
+                for _, lineData in ipairs(SkeletonLines) do
+                    if lineData[1] then
+                        lineData[1]:Remove()
+                        SkeletonLines = {}
+                    end
+                end
+            end
+        else
+            if toolshow then
+                toolshow:Remove()
+                toolshow = nil
+            end
+            if BLOCKOUTLINE then
+                BLOCKOUTLINE:Remove()
+                BLOCKOUTLINE = nil
+            end
+            if BOXPLAYER then
+                BOXPLAYER:Remove()
+                BOXPLAYER = nil
+            end
+            if FILLEDBOXPLAYER then
+                FILLEDBOXPLAYER:Remove()
+                FILLEDBOXPLAYER = nil
+            end
+            if HealthText then
+                HealthText:Remove()
+                HealthText = nil
+            end
+            if HealthBarITSELF then
+                HealthBarITSELF:Remove()
+                HealthBarITSELF = nil
+            end
+            if HealthBarBackground then
+                HealthBarBackground:Remove()
+                HealthBarBackground = nil
+            end
+            if Tracer then
+                Tracer:Remove()
+                Tracer = nil
+            end
+            if Name then
+                Name:Remove()
+                Name = nil
+            end
+            if Cube then
+                Cube:Remove()
+                Cube = nil
+            end
+            for _, lineData in ipairs(SkeletonLines) do
+                if lineData[1] then
+                    lineData[1]:Remove()
+                    SkeletonLines = {}
+                end
+            end
+        end
+    end)
+end
+
+for _, Player in pairs(game:GetService("Players"):GetChildren()) do
+    Esp:Esp(Player)
+end
+
+Players.PlayerAdded:Connect(function(v)
+    Esp:Esp(v)
+end)
+end
+
+local HitStyleThing = "Coom"
+local crosshair = loadstring(game:HttpGet("https://pastebin.com/raw/9x1TSjAK"))()
+local NEINIGGANEINEI
+local WOAHHH
+do
+local TriggerBotTarget
+local TriggerBotFovCircle = Drawing.new("Circle")
+TriggerBotFovCircle.Color = Color3.fromRGB(100,0,0)
+TriggerBotFovCircle.Visible = Settings.Combat.TriggerBot.FOV.Show and Settings.Combat.TriggerBot.Enabled
+TriggerBotFovCircle.Filled = false
+TriggerBotFovCircle.Radius = Settings.Combat.TriggerBot.FOV.Size*3
+TriggerBotFovCircle.Position = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y / 2)
+
+function UpdateFOVCuh()
+TriggerBotFovCircle.Color = Color3.fromRGB(100,0,0)
+TriggerBotFovCircle.Visible = Settings.Combat.TriggerBot.FOV.Show and Settings.Combat.TriggerBot.Enabled
+TriggerBotFovCircle.Filled = false
+TriggerBotFovCircle.Radius = Settings.Combat.TriggerBot.FOV.Size*3
+TriggerBotFovCircle.Position = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y / 2)
+end
+local IgnoreList = {LocalPlayer.Character, Camera}
+local function PartTrigguhVisible(Part)
+    if Part and Part.Head then
+        local Hit = workspace:FindPartOnRayWithIgnoreList(
+            Ray.new(Camera.CFrame.Position, Part.Head.Position - Camera.CFrame.Position), IgnoreList)
+        if Hit and Hit:IsDescendantOf(Part) then
+            return true
+        end
+        return false
+    else
+        return true
+    end
+end
+local function LocateTheseNiggas()
+    local players = game:GetService("Players")
+    local localPlayer = players.LocalPlayer
+    local closestPlayer
+    local closestDistance = math.huge
+    for _, player in ipairs(players:GetPlayers()) do
+        if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            if not Settings.Combat.TriggerBot.TargetOnly or player == Script.Locals.Target and Script.Locals.IsTargetting then
+            local part = player.Character.HumanoidRootPart
+            local screenPos, onScreen = Camera:WorldToViewportPoint(part.Position)
+            if onScreen then
+                local distanceToCenter = (TriggerBotFovCircle.Position - Vector2.new(screenPos.X, screenPos.Y)).Magnitude
+
+                if PartTrigguhVisible(player.Character) and distanceToCenter < closestDistance and distanceToCenter <= TriggerBotFovCircle.Radius then
+                    closestPlayer = player
+                    closestDistance = distanceToCenter
+                end
+            end
+        end
+        end
+    end
+    return closestPlayer
+end
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    TriggerBotTarget = LocateTheseNiggas()
+    UpdateFOVCuh()
+    if Settings.Combat.TriggerBot.Enabled then
+    if TriggerBotTarget and LocalPlayer.Character:FindFirstChildWhichIsA("Tool") ~= nil then
+    task.wait(Settings.Combat.TriggerBot.Delay)
+    LocalPlayer.Character:FindFirstChildOfClass("Tool"):Activate()
+    end
+    end
+end)
+end
+
+
+local ZPred = tonumber(Settings.Combat.Prediction.Horizontal)
+
+local placemarker = Instance.new("Part", game.Workspace)
+    spawn(function()
+        placemarker.Anchored = true
+        placemarker.CanCollide = false
+        placemarker.Size = Vector3.new(0, 0, 0)
+        placemarker.Transparency = 1
+    end)
+function makemarker(Parent, Adornee, Color, Size, Size2)
+    local e = Instance.new("BillboardGui", Parent)
+    e.Name = "PP"
+    e.Adornee = Adornee
+    e.Size = UDim2.new(Size, Size2, Size, Size2)
+    e.AlwaysOnTop = true
+    local a = Instance.new("Frame", e)
+    a.Size = UDim2.new(0.5, 0, 0.5, 0)
+    a.BackgroundTransparency = 0
+    a.BackgroundColor3 = Color
+    local z = Instance.new("UIStroke", a)
+    z.Thickness = 1.5
+    z.Color = Color3.new(255,255,255)
+    local g = Instance.new("UICorner", a)
+    g.CornerRadius = UDim.new(30, 30)
+    return(e)
+end
+
+makemarker(placemarker, placemarker, Color3.fromRGB(255,209,220), 0.8, 0)
+
+
+
+    --// Functions
+    do
+        --// Utility Functions
+        do
+            Script.Functions.WorldToScreen = function(Position: Vector3)
+                if not Position then return end
+
+                local ViewportPointPosition, OnScreen = Camera:WorldToViewportPoint(Position)
+                local ScreenPosition = Vector2.new(ViewportPointPosition.X, ViewportPointPosition.Y)
+                return {
+                    Position = ScreenPosition,
+                    OnScreen = OnScreen
+                }
+            end
+
+            Script.Functions.Connection = function(ConnectionType: any, Function: any)
+                local Connection = ConnectionType:Connect(Function)
+                return Connection
+            end
+
+            Script.Functions.MoveMouse = function(Position: Vector2, SmoothingX: number, SmoothingY: number)
+                local MousePosition = UserInputService:GetMouseLocation()
+
+                mousemoverel((Position.X - MousePosition.X) / SmoothingX, (Position.Y - MousePosition.Y) / SmoothingY)
+            end
+
+            Script.Functions.CreateDrawing = function(DrawingType: string, Properties: any)
+                local DrawingObject = Drawing.new(DrawingType)
+
+                for Property, Value in pairs(Properties) do
+                    DrawingObject[Property] = Value
+                end
+                return DrawingObject
+            end
+
+            Script.Functions.WallCheck = function(Part: any)
+                local RayCastParams = RaycastParams.new()
+                RayCastParams.FilterType = Enum.RaycastFilterType.Exclude
+                RayCastParams.IgnoreWater = true
+                RayCastParams.FilterDescendantsInstances = Script.AuraIgnoreFolder:GetChildren()
+
+                local CameraPosition = Camera.CFrame.Position
+                local Direction = (Part.Position - CameraPosition).Unit
+                local RayCastResult = workspace:Raycast(CameraPosition, Direction * 10000, RayCastParams)
+
+                return RayCastResult.Instance and RayCastResult.Instance == Part
+            end
+
+            Script.Functions.Create = function(ObjectType: string, Properties: any)
+                local Object = Instance.new(ObjectType)
+
+                for Property, Value in pairs(Properties) do
+                    Object[Property] = Value
+                end
+                return Object
+            end
+
+            Script.Functions.GetGun = function(Player: any)
+                local Info = {
+                    Tool = nil,
+                    Ammo = nil,
+                    IsGunEquipped = false
+                }
+
+                local Tool = Player.Character:FindFirstChildWhichIsA("Tool")
+
+                if not Tool then return end
+
+                if game.GameId == 1958807588 then
+                    local ArmoryGun = Player.Information.Armory:FindFirstChild(Tool.Name)
+                    if ArmoryGun then
+                        Info.Tool = Tool
+                        Info.Ammo = ArmoryGun.Ammo.Normal
+                        Info.IsGunEquipped = true
+                    else
+                        for _, Object in pairs(Tool:GetChildren()) do
+                            if Object.Name:lower():find("ammo") and not Object.Name:lower():find("max") then
+                                Info.Tool = Tool
+                                Info.IsGunEquipped = true
+                                Info.Ammo = Object
+                            end
+                        end
+                    end
+                elseif game.GameId == 3634139746 then
+                    for _, Object in pairs(Tool:getdescendants()) do
+                        if Object.Name:lower():find("ammo") and not Object.Name:lower():find("max") and not Object.Name:lower():find("no") then
+                            Info.Tool = Tool
+                            Info.Ammo = Object
+                            Info.IsGunEquipped = true
+                        end
+                    end
+                else
+                    for _, Object in pairs(Tool:GetChildren()) do
+                        if Object.Name:lower():find("ammo") and not Object.Name:lower():find("max") then
+                            Info.Tool = Tool
+                            Info.IsGunEquipped = true
+                            Info.Ammo = Object
+                        end
+                    end
+                end
+
+
+                return Info
+            end
+
+            Script.Functions.Beam = function(StartPos: Vector3, EndPos: Vector3)
+                local ColorSequence = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Settings.Visuals.BulletTracers.Color.Gradient1),
+                    ColorSequenceKeypoint.new(1, Settings.Visuals.BulletTracers.Color.Gradient2),
+                })
+                local Part = Instance.new("Part", Script.AuraIgnoreFolder)
+                Part.Size = Vector3.new(0, 0, 0)
+                Part.Massless = true
+                Part.Transparency = 1
+                Part.CanCollide = false
+                Part.Position = StartPos
+                Part.Anchored = true
+                local Attachment = Instance.new("Attachment", Part)
+                local Part2 = Instance.new("Part", Script.AuraIgnoreFolder)
+                Part2.Size = Vector3.new(0, 0, 0)
+                Part2.Transparency = 0
+                Part2.CanCollide = false
+                Part2.Position = EndPos
+                Part2.Anchored = true
+                Part2.Material = Enum.Material.ForceField
+                Part2.Color = Color3.fromRGB(255, 0, 212)
+                Part2.Massless = true
+                local Attachment2 = Instance.new("Attachment", Part2)
+                local Beam = Instance.new("Beam", Part)
+                Beam.FaceCamera = true
+                Beam.Color = ColorSequence
+                Beam.Attachment0 = Attachment
+                Beam.Attachment1 = Attachment2
+                Beam.LightEmission = 6
+                Beam.LightInfluence = 1
+                Beam.Width0 = 1.5
+                Beam.Width1 = 1.5
+                Beam.Texture = "http://www.roblox.com/asset/?id=446111271"
+                Beam.TextureSpeed = 2
+                Beam.TextureLength = 1
+                task.delay(Settings.Visuals.BulletTracers.Duration, function()
+                    if Settings.Visuals.BulletTracers.Fade.Enabled then
+                        local TweenValue = Instance.new("NumberValue")
+                        TweenValue.Parent = Beam
+                        local Tween = TweenService:Create(TweenValue, TweenInfo.new(Settings.Visuals.BulletTracers.Fade.Duration), {Value = 1})
+                        Tween:Play()
+
+                        local Connection
+                        Connection = Script.Functions.Connection(TweenValue:GetPropertyChangedSignal("Value"), function()
+                            Beam.Transparency = NumberSequence.new(TweenValue.Value, TweenValue.Value)
+                        end)
+
+                        Script.Functions.Connection(Tween.Completed, function()
+                            Connection:Disconnect()
+                            Part:Destroy()
+                            Part2:Destroy()
+                        end)
+                    else
+                        Part:Destroy()
+                        Part2:Destroy()
+                    end
+                end)
+            end
+
+            Script.Functions.Impact = function(Pos: Vector3)
+                local Part = Script.Functions.Create("Part", {
+                    Parent = Script.AuraIgnoreFolder,
+                    Color = Settings.Visuals.BulletImpacts.Color,
+                    Size = Vector3.new(Settings.Visuals.BulletImpacts.Size, Settings.Visuals.BulletImpacts.Size, Settings.Visuals.BulletImpacts.Size),
+                    Position = Pos,
+                    Anchored = true,
+                    Material = Enum.Material[Settings.Visuals.BulletImpacts.Material]
+                })
+
+                task.delay(Settings.Visuals.BulletImpacts.Duration, function()
+                    if Settings.Visuals.BulletImpacts.Fade.Enabled then
+                        local Tween = TweenService:Create(Part, TweenInfo.new(Settings.Visuals.BulletImpacts.Fade.Duration), {Transparency = 1})
+                        Tween:Play()
+
+                        Script.Functions.Connection(Tween.Completed, function()
+                            Part:Destroy()
+                        end)
+                    else
+                        Part:Destroy()
+                    end
+                end)
+            end
+
+            Script.Functions.GetClosestPlayerDamage = function(Position: Vector3, MaxRadius: number)
+                local Radius = MaxRadius
+                local ClosestPlayer
+
+                for PlayerName, Health in pairs(Script.Locals.PlayerHealth) do
+                    local Player = Players:FindFirstChild(PlayerName)
+                    if Player and Player.Character then
+                        local PlayerPosition = Player.Character.PrimaryPart.Position
+                        local Distance = (Position - PlayerPosition).Magnitude
+                        local CurrentHealth = Player.Character.Humanoid.Health
+                        if (Distance < Radius) and (CurrentHealth < Health) then
+                            Radius = Distance
+                            ClosestPlayer = Player
+                        end
+                    end
+                end
+                return ClosestPlayer
+            end
+
+
+            Script.Functions.Effect = function(Part, Color)
+                local Clone = Script.Locals.HitEffect[HitStyleThing]:Clone()
+                Clone.Parent = Part
+
+                for _, Effect in pairs(Clone:GetChildren()) do
+                    if Effect:IsA("ParticleEmitter") then
+                        Effect.Color = ColorSequence.new({
+                            ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
+                            ColorSequenceKeypoint.new(0.495, Settings.Visuals.OnHit.Effect.Color),
+                            ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0)),
+                        })
+                        Effect:Emit()
+                    end
+                end
+
+                task.delay(2, function()
+                    Clone:Destroy()
+                end)
+            end
+
+            Script.Functions.PlaySound = function(SoundId, Volume)
+                local Sound = Instance.new("Sound")
+                Sound.Parent = Script.AuraIgnoreFolder
+                Sound.Volume = Volume
+                Sound.SoundId = SoundId
+
+                Sound:Play()
+
+                Script.Functions.Connection(Sound.Ended, function()
+                    Sound:Destroy()
+                end)
+            end
+
+            Script.Functions.Hitcham = function(Player, Color)
+      local Character = Player.Character
+      local RootPart  = Character and Character:FindFirstChild('HumanoidRootPart')
+              Character.Archivable  = true
+              local Clone = Character:Clone()
+              Clone.Parent = EtherealParts
+              Clone.Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+              local highlight = Instance.new("Highlight")
+              highlight.Parent = Clone
+              highlight.FillColor = Color
+              highlight.OutlineColor = Color3.fromRGB(255,255,255)
+              highlight.OutlineTransparency = 0
+              highlight.FillTransparency = 0.5
+              highlight.DepthMode = Enum.HighlightDepthMode.Occluded
+              highlight.Adornee = Clone
+              for _, v in pairs(Clone:GetDescendants()) do
+                  if (v:IsA('MeshPart')) then
+                      v.Material = Enum.Material.ForceField
+                      v.Color = Color
+                      v.CanCollide = false
+                      v.Anchored = true
+                      v.CanQuery = false
+                      v.CanTouch = false
+                  end
+  
+                  if (v:IsA('Accessory') or v:IsA('Tool')) then
+                      v:Destroy()
+                  end
+              end
+  
+              for i,v in pairs(Character:GetDescendants()) do
+                  if (v:IsA('MeshPart')) then
+                      local ClonePart = Clone:FindFirstChild(v.Name)
+  
+                      if (ClonePart) then
+                          ClonePart.CFrame = v.CFrame
+                      end
+                  end
+              end
+  
+              Clone:PivotTo(Character.PrimaryPart.CFrame + Vector3.new(LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector.x * 1.5, 0, LocalPlayer.Character.HumanoidRootPart.CFrame.lookVector.z * 1.5))
+  
+              Character.Archivable = false
+              Debris:AddItem(Clone, 2)
+            end
+
+            Script.Functions.Rotate = function(Vector, Origin, Angle)
+                local CosA = math.cos(Angle)
+                local SinA = math.sin(Angle)
+                local X = Vector.X - Origin.X
+                local Y = Vector.Y - Origin.Y
+                local NewX = X * CosA - Y * SinA
+                local NewY = X * SinA + Y * CosA
+                return Vector2.new(NewX + Origin.x, NewY + Origin.y)
+            end
+        end
+        --// General Functions
+        do
+            Script.Functions.GetClosestPlayerNumbah = function()
+                local Radius = Settings.Combat.AutoSelect.Enabled and Settings.Combat.Fov.Radius or math.huge
+                local ClosestPlayer
+                local Mouse = UserInputService:GetMouseLocation()
+
+                for _, Player in pairs(Players:GetPlayers()) do
+                    if Player ~= LocalPlayer then
+                        --// Variables
+                        local ScreenPosition = Script.Functions.WorldToScreen(Player.Character.HumanoidRootPart.Position)
+                        local Distance = ((workspace.CurrentCamera.ViewportSize * 0.5) - ScreenPosition.Position).Magnitude
+
+                        --// OnScreen Check
+                        if not ScreenPosition.OnScreen then continue end
+
+                        --// Checks
+                        if (Settings.Combat.Checks.Enabled and (Settings.Combat.Checks.Vehicle and Player.Character:FindFirstChild("[CarHitBox]")) or (Settings.Combat.Checks.Knocked and Player.Character.BodyEffects["K.O"].Value == true) or (Settings.Combat.Checks.Grabbed and Player.Character:FindFirstChild("GRABBING_CONSTRAINT")) or (Settings.Combat.Checks.Crew and Player.DataFolder.Information.Crew.Value == LocalPlayer.DataFolder.Information.Crew.Value) or (Settings.Combat.Checks.Wall and Script.Functions.WallCheck(Player.Character.PrimaryPart))) then continue end
+
+                        if (Distance <= Radius) then
+                            Radius = Distance
+                            ClosestPlayer = Player
+                        end
+                    end
+                end
+
+                return ClosestPlayer
+            end
+            Script.Functions.GetClosestPlayer = function()
+                local Radius = Settings.Combat.AutoSelect.Enabled and Settings.Combat.Fov.Radius or math.huge
+                local ClosestPlayer
+                local Mouse = UserInputService:GetMouseLocation()
+
+                for _, Player in pairs(Players:GetPlayers()) do
+                    if Player ~= LocalPlayer then
+                        --// Variables
+                        local ScreenPosition = Script.Functions.WorldToScreen(Player.Character.HumanoidRootPart.Position)
+                        local Distance = (Mouse - ScreenPosition.Position).Magnitude
+
+                        --// OnScreen Check
+                        if not ScreenPosition.OnScreen then continue end
+
+                        --// Checks
+                        if (Settings.Combat.Checks.Enabled and (Settings.Combat.Checks.Vehicle and Player.Character:FindFirstChild("[CarHitBox]")) or (Settings.Combat.Checks.Knocked and Player.Character.BodyEffects["K.O"].Value == true) or (Settings.Combat.Checks.Grabbed and Player.Character:FindFirstChild("GRABBING_CONSTRAINT")) or (Settings.Combat.Checks.Crew and Player.DataFolder.Information.Crew.Value == LocalPlayer.DataFolder.Information.Crew.Value) or (Settings.Combat.Checks.Wall and Script.Functions.WallCheck(Player.Character.PrimaryPart))) then continue end
+
+                        if (Distance < Radius) then
+                            Radius = Distance
+                            ClosestPlayer = Player
+                        end
+                    end
+                end
+
+                return ClosestPlayer
+            end
+
+            Script.Functions.GetTargetPredictedPosition = function()
+                local BodyPart = Script.Locals.Target.Character[Settings.Combat.AimPart]
+                local Velocity = Settings.Combat.Resolver.Enabled and Vector3.new(Script.Locals.Resolver.ResolvedVelocity.X*Settings.Combat.Prediction.Horizontal, math.clamp(Script.Locals.Resolver.ResolvedVelocity.Y,-10,50)*Settings.Combat.Prediction.Vertical,Script.Locals.Resolver.ResolvedVelocity.Z*ZPred) or Vector3.new(Script.Locals.Target.Character.HumanoidRootPart.AssemblyLinearVelocity.X*Se
